@@ -1,0 +1,15 @@
+{
+  "name": "Proxy",
+  "version": "1.0.0",
+  "description": "This is a local proxy server to allow CORS",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "Matt Coulter",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.1",
+    "request": "^2.59.0"
+  }
+}
