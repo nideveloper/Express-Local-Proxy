@@ -13,12 +13,7 @@ app.use(function(req, res, next) {
 });
 
 app.get('/', function (req, res) {
-    var request = require('request');
-    request('http://nideveloper.co.uk/api', function (error, response, body) {
-      if (!error && response.statusCode == 200) {
-        res.send(body);
-      }
-    })
+    res.send("This is a proxy for the NIDeveloper API");
 });
 
 app.get('/api/*', function (req, res) {
