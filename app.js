@@ -1,5 +1,6 @@
 var express = require('express');
 var nconf = require('nconf');
+var mysql = require('mysql');
 var app = express();
 
 nconf.argv()
@@ -22,6 +23,35 @@ app.get('/api/*', function (req, res) {
 
     console.log("Calling URL " + req.url);
     r.get('http://nideveloper.co.uk' + req.url).pipe(res);
+});
+
+function getDBConnectionProperties() {
+    var properties = {
+    host: nconf.get('SQL_HOST'),
+    user: nconf.get('SQL_USER'),
+    password: nconf.get('SQL_PASSWORD'),
+    database : nconf.get('SQL_DATABASE')
+    };
+
+    return properties;
+}
+
+app.get('/v2/api/posts/latest', function (req, res) {
+    var connection = mysql.createConnection(getDBConnectionProperties());
+    connection.connect();
+    connection.query(nconf.get('SQL_LATEST_POSTS'), function (err, rows, fields) {
+        if (err){
+            throw err
+        }
+
+        for (var i in rows) {
+            rows[i].content = rows[i].content.toString('utf-8');
+
+        }
+        res.json(rows);
+    });
+
+    connection.end();
 });
 
 app.get('/twitter/nideveloper', function (req, res) {
