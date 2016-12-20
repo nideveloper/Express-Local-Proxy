@@ -36,7 +36,7 @@ function getDBConnectionProperties() {
     return properties;
 }
 
-app.get('/v2/api/posts/latest', function (req, res) {
+app.get('/v2/api/posts', function (req, res) {
     var connection = mysql.createConnection(getDBConnectionProperties());
     connection.connect();
     connection.query(nconf.get('SQL_LATEST_POSTS'), function (err, rows, fields) {
@@ -44,10 +44,10 @@ app.get('/v2/api/posts/latest', function (req, res) {
             throw err
         }
 
-        for (var i in rows) {
+        /*for (var i in rows) {
             rows[i].content = rows[i].content.toString('utf-8');
 
-        }
+        }*/
         res.json(rows);
     });
 
