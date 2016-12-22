@@ -83,6 +83,21 @@ app.get('/v2/api/categories', function (req, res) {
     connection.end();
 });
 
+app.get('/v2/api/categories/:id', function (req, res) {
+    var id = req.params.id;
+    var connection = mysql.createConnection(getDBConnectionProperties());
+    connection.connect();
+    connection.query(nconf.get('SQL_SPECIFIC_CATEGORY_BY_ID'), id, function (err, rows, fields) {
+        if (err){
+            throw err
+        }
+
+        res.json(rows);
+    });
+
+    connection.end();
+});
+
 app.get('/twitter/nideveloper', function (req, res) {
     var Twitter = require('twitter');
 
