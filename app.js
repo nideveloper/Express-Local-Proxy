@@ -62,6 +62,22 @@ var convertContentBLOBtoString = function(rows){
     return rows;
 };
 
+function getSimilarQuery(similar) {
+    var sql = nconf.get("SQL_SEARCH_SIMILAR");
+    var inserts = [similar, similar];
+    sql = mysql.format(sql, inserts);
+
+    return sql;
+}
+
+function getSearchQuery(query) {
+    var sql = nconf.get("SQL_SEARCH");
+    var inserts = [query, query, query];
+    sql = mysql.format(sql, inserts);
+
+    return sql;
+}
+
 app.get('/v2/api/posts', function (req, res) {
     contactDB(nconf.get("SQL_LATEST_POSTS"), res);
 });
@@ -89,12 +105,23 @@ app.get('/v2/api/categories/:id', function (req, res) {
 });
 
 app.get('/v2/api/search', function (req, res) {
-    var query = '%'+req.query.query+'%';
-    var sql = nconf.get("SQL_SEARCH");
-    var inserts = [query, query, query];
-    sql = mysql.format(sql, inserts);
+    var sql = null;
 
-    contactDB(sql, res);
+    //Build the correct query for the parameter passed
+    if(typeof req.query.query !== 'undefined'){
+        var query = '%'+req.query.query+'%';
+        sql = getSearchQuery(query);
+    }else if (typeof req.query.similar !== 'undefined') {
+        var similar = req.query.similar;
+        sql = getSimilarQuery(similar);
+    }
+
+    //Make sure a valid parameter was passed
+    if(sql !== null) {
+        contactDB(sql, res);
+    }else {
+        res.json([]);
+    }
 });
 
 app.get('/twitter/nideveloper', function (req, res) {
