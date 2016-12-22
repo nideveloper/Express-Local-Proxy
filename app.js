@@ -58,7 +58,6 @@ app.get('/v2/api/posts/:id', function (req, res) {
         if (err){
             throw err
         }
-        console.log(rows);
         for (var i in rows) {
             rows[i].content = rows[i].content.toString('utf-8');
 
@@ -98,6 +97,27 @@ app.get('/v2/api/categories/:id', function (req, res) {
     connection.end();
 });
 
+app.get('/v2/api/search', function (req, res) {
+    var query = req.query.query;
+    query = '%'+query+'%';
+    var connection = mysql.createConnection(getDBConnectionProperties());
+    connection.connect();
+
+    var sql = nconf.get("SQL_SEARCH");
+    var inserts = [query, query, query];
+    sql = mysql.format(sql, inserts);
+    
+    connection.query(sql, function (err, rows, fields) {
+        if (err){
+            throw err
+        }
+
+        res.json(rows);
+    });
+
+    connection.end();
+});
+
 app.get('/twitter/nideveloper', function (req, res) {
     var Twitter = require('twitter');
 
@@ -110,8 +130,6 @@ app.get('/twitter/nideveloper', function (req, res) {
             proxy: nconf.get('PROXY')
         }
     });
-
-    console.log("Loading NI Developer Tweets");
 
     var params = { screen_name: 'nideveloper', count: 5 };
 
