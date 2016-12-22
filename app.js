@@ -54,6 +54,14 @@ function contactDB(sql, res, mutatorFunction) {
     connection.end();
 }
 
+//the content comes back as a BLOB, converting to string
+var convertContentBLOBtoString = function(rows){
+    for (var i in rows) {
+        rows[i].content = rows[i].content.toString('utf-8');
+    }
+    return rows;
+};
+
 app.get('/v2/api/posts', function (req, res) {
     contactDB(nconf.get("SQL_LATEST_POSTS"), res);
 });
@@ -64,14 +72,7 @@ app.get('/v2/api/posts/:id', function (req, res) {
     var inserts = [id];
     sql = mysql.format(sql, inserts);
 
-    var func = function(rows){
-        for (var i in rows) {
-            rows[i].content = rows[i].content.toString('utf-8');
-        }
-        return rows;
-    };
-
-    contactDB(sql, res, func);
+    contactDB(sql, res, convertContentBLOBtoString);
 });
 
 app.get('/v2/api/categories', function (req, res) {
