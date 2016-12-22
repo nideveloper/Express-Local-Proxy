@@ -36,86 +36,64 @@ function getDBConnectionProperties() {
     return properties;
 }
 
-app.get('/v2/api/posts', function (req, res) {
+function contactDB(sql, res, mutatorFunction) {
     var connection = mysql.createConnection(getDBConnectionProperties());
     connection.connect();
-    connection.query(nconf.get('SQL_LATEST_POSTS'), function (err, rows, fields) {
-        if (err){
-            throw err
-        }
+    var response;
 
-        res.json(rows);
-    });
-
-    connection.end();
-});
-
-app.get('/v2/api/posts/:id', function (req, res) {
-    var id = req.params.id;
-    var connection = mysql.createConnection(getDBConnectionProperties());
-    connection.connect();
-    connection.query(nconf.get('SQL_SPECIFIC_POST_BY_ID'), id,  function (err, rows, fields) {
-        if (err){
-            throw err
-        }
-        for (var i in rows) {
-            rows[i].content = rows[i].content.toString('utf-8');
-
-        }
-        res.json(rows);
-    });
-
-    connection.end();
-});
-
-app.get('/v2/api/categories', function (req, res) {
-    var connection = mysql.createConnection(getDBConnectionProperties());
-    connection.connect();
-    connection.query(nconf.get('SQL_ALL_CATEGORIES'), function (err, rows, fields) {
-        if (err){
-            throw err
-        }
-
-        res.json(rows);
-    });
-
-    connection.end();
-});
-
-app.get('/v2/api/categories/:id', function (req, res) {
-    var id = req.params.id;
-    var connection = mysql.createConnection(getDBConnectionProperties());
-    connection.connect();
-    connection.query(nconf.get('SQL_SPECIFIC_CATEGORY_BY_ID'), id, function (err, rows, fields) {
-        if (err){
-            throw err
-        }
-
-        res.json(rows);
-    });
-
-    connection.end();
-});
-
-app.get('/v2/api/search', function (req, res) {
-    var query = req.query.query;
-    query = '%'+query+'%';
-    var connection = mysql.createConnection(getDBConnectionProperties());
-    connection.connect();
-
-    var sql = nconf.get("SQL_SEARCH");
-    var inserts = [query, query, query];
-    sql = mysql.format(sql, inserts);
-    
     connection.query(sql, function (err, rows, fields) {
         if (err){
             throw err
         }
-
+        if(typeof mutatorFunction != 'undefined'){
+            rows = mutatorFunction(rows);
+        }
         res.json(rows);
     });
 
     connection.end();
+}
+
+app.get('/v2/api/posts', function (req, res) {
+    contactDB(nconf.get("SQL_LATEST_POSTS"), res);
+});
+
+app.get('/v2/api/posts/:id', function (req, res) {
+    var id = req.params.id;
+    var sql = nconf.get("SQL_SPECIFIC_POST_BY_ID");
+    var inserts = [id];
+    sql = mysql.format(sql, inserts);
+
+    var func = function(rows){
+        for (var i in rows) {
+            rows[i].content = rows[i].content.toString('utf-8');
+        }
+        return rows;
+    };
+
+    contactDB(sql, res, func);
+});
+
+app.get('/v2/api/categories', function (req, res) {
+    contactDB(nconf.get("SQL_ALL_CATEGORIES"), res);
+});
+
+app.get('/v2/api/categories/:id', function (req, res) {
+    var id = req.params.id;
+    var sql = nconf.get("SQL_SPECIFIC_CATEGORY_BY_ID");
+    var inserts = [id];
+    sql = mysql.format(sql, inserts);
+
+    contactDB(sql, res);
+});
+
+app.get('/v2/api/search', function (req, res) {
+    var query = '%'+req.query.query+'%';
+    var sql = nconf.get("SQL_SEARCH");
+    var inserts = [query, query, query];
+    sql = mysql.format(sql, inserts);
+
+    contactDB(sql, res);
 });
 
 app.get('/twitter/nideveloper', function (req, res) {
