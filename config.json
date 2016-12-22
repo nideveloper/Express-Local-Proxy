@@ -8,5 +8,6 @@
   "SQL_USER": "",
   "SQL_PASSWORD": "",
   "SQL_DATABASE" : "",
-  "SQL_LATEST_POSTS": ""
+  "SQL_LATEST_POSTS": "",
+  "SQL_SPECIFIC_POST_BY_ID": ""
 }

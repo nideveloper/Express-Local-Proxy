@@ -44,10 +44,25 @@ app.get('/v2/api/posts', function (req, res) {
             throw err
         }
 
-        /*for (var i in rows) {
+        res.json(rows);
+    });
+
+    connection.end();
+});
+
+app.get('/v2/api/posts/:id', function (req, res) {
+    var id = req.params.id;
+    var connection = mysql.createConnection(getDBConnectionProperties());
+    connection.connect();
+    connection.query(nconf.get('SQL_SPECIFIC_POST_BY_ID'), id,  function (err, rows, fields) {
+        if (err){
+            throw err
+        }
+        console.log(rows);
+        for (var i in rows) {
             rows[i].content = rows[i].content.toString('utf-8');
 
-        }*/
+        }
         res.json(rows);
     });
 
