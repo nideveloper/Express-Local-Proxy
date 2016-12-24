@@ -62,6 +62,14 @@ var convertContentBLOBtoString = function(rows){
     return rows;
 };
 
+function getCategoryQuery(category) {
+    var sql = nconf.get("SQL_SEARCH_CATEGORY");
+    var inserts = [category];
+    sql = mysql.format(sql, inserts);
+
+    return sql;
+}
+
 function getSimilarQuery(similar) {
     var sql = nconf.get("SQL_SEARCH_SIMILAR");
     var inserts = [similar, similar];
@@ -114,6 +122,9 @@ app.get('/v2/api/search', function (req, res) {
     }else if (typeof req.query.similar !== 'undefined') {
         var similar = req.query.similar;
         sql = getSimilarQuery(similar);
+    }else if (typeof req.query.category !== 'undefined') {
+        var category = req.query.category;
+        sql = getCategoryQuery(category);
     }
 
     //Make sure a valid parameter was passed
